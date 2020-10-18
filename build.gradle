@@ -1,0 +1,50 @@
+plugins {
+    id 'org.springframework.boot' version '2.3.4.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+    id 'java'
+}
+
+group = 'com.crane'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven {
+        url 'https://jitpack.io'
+    }
+}
+
+dependencyManagement {
+    dependencies {
+        dependency 'com.squareup.okhttp3:okhttp:4.7.2'
+        dependency 'com.squareup.okhttp3:okhttp-urlconnection:4.7.2'
+    }
+}
+
+dependencies {
+
+
+    implementation 'com.github.instagram4j:instagram4j:develop-SNAPSHOT'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-quartz
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-quartz', version: '2.3.4.RELEASE'
+    compile "org.telegram:telegrambots:4.9.1"
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
