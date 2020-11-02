@@ -1,7 +1,7 @@
 package com.crane.instafoll;
 
+import com.crane.instafoll.services.InstaActionService;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -9,7 +9,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 class InstafollApplicationTests {
 
     @MockBean
-    FollowService followService;
+    InstaActionService instaActionService;
 
     @Test
     void contextLoads() {

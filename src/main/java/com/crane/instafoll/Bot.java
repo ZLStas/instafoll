@@ -1,0 +1,133 @@
+package com.crane.instafoll;
+
+import com.crane.instafoll.jobs.JobsService;
+import com.crane.instafoll.jobs.follow.FollowParams;
+import com.crane.instafoll.services.LoginService;
+import com.crane.instafoll.machine.Machine;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
+import org.quartz.SchedulerException;
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.objects.Update;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Slf4j
+public class Bot extends TelegramLongPollingBot {
+
+
+    public static final int ONE_HOUR = 3600;
+
+    public static final String USER_MACHINE_STATE = "userMachineState";
+    public static final String FOLLOW_COMMAND = "follow";
+
+    public static final String INPUT_LOGIN_SENT_STATE = "inputLoginSent";
+    public static final String PASSWORD_SET_STATE = "passwordSet";
+    public static final String GRITTING_SENT_STATE = "grittingSent";
+
+    public static final String CURRENT_INTERACTION = "currentInteraction";
+    public static final String INSTAGRAM_LOGIN = "instagramLogin";
+    public static final String INSTAGRAM_PASSWORD = "instagramPassword";
+
+    private final LoginService loginService;
+
+    private final JobsService jobsService;
+
+
+    private final Map<String, Machine> machines = new HashMap<>();
+
+    public Bot(LoginService loginService, JobsService jobsService) {
+        this.loginService = loginService;
+        this.jobsService = jobsService;
+    }
+
+
+
+    @SneakyThrows
+    @Override
+    public void onUpdateReceived(Update update) {
+        Machine machine = getUserMachine(update);
+        machine.process(update);
+
+
+//        String messageTest = getMessageTest(update);
+//        log.info("Message: \"{}\" got from user: {}", messageTest, getUserName(update));
+//
+//        Map<String, String> currentUserStorage = getCurrentUserStorage(update);
+//        String currentUserState = currentUserStorage.get(CURRENT_INTERACTION);
+//
+//        if (currentUserState == null) {
+//            currentUserStorage.put(CURRENT_INTERACTION, GRITTING_SENT_STATE);
+//            sendResponse(update, "Доступна фіча автофоловінгу, щоб розпочати введіть \"follow\"");
+//            return;
+//        }
+//
+//        if (FOLLOW_COMMAND.equalsIgnoreCase(messageTest)) {
+//            currentUserStorage.put(CURRENT_INTERACTION, INPUT_LOGIN_SENT_STATE);
+//            sendResponse(update, "Введіть логін");
+//            return;
+//        }
+//
+//        if (INPUT_LOGIN_SENT_STATE.equalsIgnoreCase(currentUserState)) {
+//            currentUserStorage.put(INSTAGRAM_LOGIN, messageTest);
+//            currentUserStorage.put(CURRENT_INTERACTION, PASSWORD_SET_STATE);
+//            sendResponse(update, "Введіть пароль");
+//            return;
+//        }
+//
+//        if (PASSWORD_SET_STATE.equalsIgnoreCase(currentUserState)) {
+//            currentUserStorage.put(INSTAGRAM_PASSWORD, messageTest);
+//            currentUserStorage.put(CURRENT_INTERACTION, PASSWORD_SET_STATE);
+//
+//            startFollowJob(update);
+//
+//            sendResponse(update, "фоллов джоба запущенна!, перевірте свій інстаграм!");
+//            return;
+//        }
+
+//        sendResponse(update, "Упс, фігня якась, нема такої команди!");
+    }
+
+    @NotNull
+    Machine getUserMachine(Update update) {
+        return machines.computeIfAbsent(getUserName(update), x -> new Machine(new HashMap<>(), this));
+
+    }
+
+
+
+
+    public static String getUserName(Update update) {
+        return update.getMessage().getFrom().getUserName();
+    }
+
+    void startFollowJob(Update update) throws SchedulerException {
+        Map<String, String> userStorage = usersStorage.get(getUserName(update));
+        String login = userStorage.get(INSTAGRAM_LOGIN);
+        String password = userStorage.get(INSTAGRAM_PASSWORD);
+
+        FollowParams followParams = FollowParams.builder()
+                .intervalInSeconds(3600)
+                .maxActionNumber(500)
+                .maxRequestsInOneBatch(100)
+                .maxWaitTime(10)
+                .startWith("karol_461")
+                .userClient(loginService.tryLogin(login, password))
+                .userName(update.getMessage().getFrom().getUserName())
+                .build();
+
+        jobsService.scheduleFollowJob(followParams);
+    }
+
+    @Override
+    public String getBotUsername() {
+        return "InstafollControlBot";
+    }
+
+    @Override
+    public String getBotToken() {
+        return "1272038774:AAGhfPBkI458FTQexuhQ2jOzT-pdDwc3QoE";
+    }
+}

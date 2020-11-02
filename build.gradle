@@ -31,7 +31,6 @@ dependencyManagement {
 
 dependencies {
 
-
     implementation 'com.github.instagram4j:instagram4j:develop-SNAPSHOT'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-quartz
