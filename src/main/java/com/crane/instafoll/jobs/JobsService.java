@@ -19,10 +19,11 @@ public class JobsService {
 
 //    private final Scheduler scheduler;
 
-    public void scheduleFollowJob(FollowParams params) throws SchedulerException {
-        SchedulerFactory schedulerFactory = new StdSchedulerFactory();
-        Scheduler scheduler = schedulerFactory.getScheduler();
-        scheduler.start();
+    public boolean scheduleFollowJob(FollowParams params) {
+        Scheduler scheduler = getScheduler();
+        if (!startScheduling(scheduler)) {
+            return false;
+        }
 
         JobDataMap jobData = new JobDataMap();
         jobData.put(MAX_ACTION_NUMBER, params.getMaxActionNumber());
@@ -48,8 +49,41 @@ public class JobsService {
                         .repeatForever())
                 .build();
 
-        scheduler.scheduleJob(job, trigger);
+        return startJob(scheduler, job, trigger);
 
+    }
+
+    Scheduler getScheduler() {
+        SchedulerFactory schedulerFactory = new StdSchedulerFactory();
+        try {
+            return schedulerFactory.getScheduler();
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    boolean startScheduling(Scheduler scheduler) {
+        if (scheduler == null) {
+            return false;
+        }
+        try {
+            scheduler.start();
+            return true;
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private boolean startJob(Scheduler scheduler, JobDetail job, Trigger trigger) {
+        try {
+            scheduler.scheduleJob(job, trigger);
+            return true;
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 }

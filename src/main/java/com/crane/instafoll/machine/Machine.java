@@ -1,6 +1,8 @@
 package com.crane.instafoll.machine;
 
 import com.crane.instafoll.Bot;
+import com.crane.instafoll.jobs.JobsService;
+import com.crane.instafoll.jobs.follow.FollowParams;
 import com.crane.instafoll.machine.states.HelloState;
 import com.crane.instafoll.machine.states.State;
 import com.crane.instafoll.services.LoginService;
@@ -17,13 +19,16 @@ public class Machine {
 
     private final Bot bot;
 
+    private final JobsService jobsService;
+
     private State state;
 
     private final Map<String, Object> userStorage;
 
-    public Machine(Map<String, Object> userStorage, Bot bot) {
+    public Machine(Map<String, Object> userStorage, Bot bot, JobsService jobsService) {
         this.bot = bot;
         this.userStorage = userStorage;
+        this.jobsService = jobsService;
         this.state = new HelloState(this);
     }
 
@@ -53,6 +58,10 @@ public class Machine {
 
     public Map<String, Object> getUserStorage() {
         return userStorage;
+    }
+
+    public boolean scheduleFollowJob(FollowParams followParams) {
+        return jobsService.scheduleFollowJob(followParams);
     }
 
     public IGClient instagramLogin(String login, String password) {

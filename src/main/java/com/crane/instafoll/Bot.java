@@ -1,13 +1,11 @@
 package com.crane.instafoll;
 
 import com.crane.instafoll.jobs.JobsService;
-import com.crane.instafoll.jobs.follow.FollowParams;
 import com.crane.instafoll.services.LoginService;
 import com.crane.instafoll.machine.Machine;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.quartz.SchedulerException;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -31,15 +29,13 @@ public class Bot extends TelegramLongPollingBot {
     public static final String INSTAGRAM_LOGIN = "instagramLogin";
     public static final String INSTAGRAM_PASSWORD = "instagramPassword";
 
-    private final LoginService loginService;
 
     private final JobsService jobsService;
 
 
     private final Map<String, Machine> machines = new HashMap<>();
 
-    public Bot(LoginService loginService, JobsService jobsService) {
-        this.loginService = loginService;
+    public Bot(JobsService jobsService) {
         this.jobsService = jobsService;
     }
 
@@ -92,34 +88,16 @@ public class Bot extends TelegramLongPollingBot {
 
     @NotNull
     Machine getUserMachine(Update update) {
-        return machines.computeIfAbsent(getUserName(update), x -> new Machine(new HashMap<>(), this));
+        return machines.computeIfAbsent(getUserName(update), x -> new Machine(new HashMap<>(), this, jobsService));
 
     }
-
-
 
 
     public static String getUserName(Update update) {
         return update.getMessage().getFrom().getUserName();
     }
 
-    void startFollowJob(Update update) throws SchedulerException {
-        Map<String, String> userStorage = usersStorage.get(getUserName(update));
-        String login = userStorage.get(INSTAGRAM_LOGIN);
-        String password = userStorage.get(INSTAGRAM_PASSWORD);
 
-        FollowParams followParams = FollowParams.builder()
-                .intervalInSeconds(3600)
-                .maxActionNumber(500)
-                .maxRequestsInOneBatch(100)
-                .maxWaitTime(10)
-                .startWith("karol_461")
-                .userClient(loginService.tryLogin(login, password))
-                .userName(update.getMessage().getFrom().getUserName())
-                .build();
-
-        jobsService.scheduleFollowJob(followParams);
-    }
 
     @Override
     public String getBotUsername() {
