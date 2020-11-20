@@ -22,7 +22,6 @@ public class FollowJob implements Job {
 
     private int maxActionNumber;
 
-
     private int followed = 0;
 
     private InstaActionService instaActionService;

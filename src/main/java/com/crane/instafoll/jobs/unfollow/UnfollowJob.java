@@ -15,16 +15,15 @@ import java.util.List;
 
 import static com.github.instagram4j.instagram4j.requests.friendships.FriendshipsFeedsRequest.FriendshipsFeeds.FOLLOWING;
 
-@AllArgsConstructor
 @Setter
 @Slf4j
 public class UnfollowJob implements Job {
 
-    private final int maxActionNumber;
+    private int maxActionNumber;
+
+    private InstaActionService instaActionService;
 
     private int unfollowed = 0;
-
-    private final InstaActionService instaActionService;
 
     public void execute(JobExecutionContext context) {
         log.info("Unfollow started at: {}", new Date());

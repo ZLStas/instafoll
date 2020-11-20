@@ -1,28 +1,33 @@
 package com.crane.instafoll.jobs.follow;
 
+import com.crane.instafoll.jobs.JobParams;
 import com.github.instagram4j.instagram4j.IGClient;
 import lombok.*;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
+
 @Setter
 @Getter
-public class FollowParams {
+public class FollowParams extends JobParams {
 
-    private  String userName;
+    private String startWith;
 
-    private  String startWith;
-
-
-    private  int maxActionNumber;
-
-    private  int intervalInSeconds;
-
-    private  int maxWaitTime;
-
-    private  int maxRequestsInOneBatch;
-
-    private  IGClient userClient;
-
+    @Builder
+    public FollowParams(String userName,
+                        String startWith,
+                        int maxActionNumber,
+                        int intervalInSeconds,
+                        int maxWaitTime,
+                        int maxRequestsInOneBatch,
+                        IGClient userClient
+    ) {
+        super(
+                userName,
+                maxActionNumber,
+                intervalInSeconds,
+                maxWaitTime,
+                maxRequestsInOneBatch,
+                userClient
+        );
+        this.startWith = startWith;
+    }
 }

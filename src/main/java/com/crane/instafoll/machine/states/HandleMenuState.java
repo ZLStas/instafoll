@@ -1,6 +1,7 @@
 package com.crane.instafoll.machine.states;
 
 import com.crane.instafoll.jobs.follow.FollowParams;
+import com.crane.instafoll.jobs.unfollow.UnfollowParams;
 import com.crane.instafoll.machine.Machine;
 import com.github.instagram4j.instagram4j.IGClient;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -32,7 +33,7 @@ public class HandleMenuState extends State {
                 startFollowJob(update);
                 break;
             case UNFOLLOW:
-                machine.changeStateTo(new StartUnfollowJobState(machine));
+                startUnfollowJob(update);
                 break;
             case RELOGIN:
                 relogin(update);
@@ -60,6 +61,29 @@ public class HandleMenuState extends State {
                 .build();
 
         boolean jobScheduled = machine.scheduleFollowJob(followParams);
+        if (jobScheduled) {
+            machine.sendResponse(update, "Job has been scheduled!");
+            renderMenu(update);
+        } else {
+            machine.sendResponse(update, "Job scheduling failed try later");
+            relogin(update);
+        }
+    }
+
+    public void startUnfollowJob(Update update) {
+        Map<String, Object> userStorage = machine.getUserStorage();
+        IGClient client = (IGClient) userStorage.get(INSTAGRAM_CLIENT.toString());
+
+        UnfollowParams params = UnfollowParams.builder()
+                .intervalInSeconds(3600)
+                .maxActionNumber(500)
+                .maxRequestsInOneBatch(100)
+                .maxWaitTime(10)
+                .userClient(client)
+                .userName(getUserName(update))
+                .build();
+
+        boolean jobScheduled = machine.scheduleUnfollowJob(params);
         if (jobScheduled) {
             machine.sendResponse(update, "Job has been scheduled!");
             renderMenu(update);
