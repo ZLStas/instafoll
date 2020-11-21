@@ -23,8 +23,9 @@ public class HandleMenuState extends State {
     private static final String RELOGIN = "relogin";
     private static final String SCHEDULED = "scheduled";
     private static final String STOP = "stop";
+    public static final String TRIGGERS = "triggers";
 
-    static final List<String> menuOptions = asList(FOLLOW, UNFOLLOW, RELOGIN, SCHEDULED, STOP, RESTART);
+    static final List<String> menuOptions = asList(FOLLOW, UNFOLLOW, RELOGIN, SCHEDULED, TRIGGERS, STOP, RESTART);
 
     public HandleMenuState(Machine machine) {
         super(machine);
@@ -46,6 +47,9 @@ public class HandleMenuState extends State {
             case SCHEDULED:
                 showScheduledJobs(update);
                 break;
+            case TRIGGERS:
+                showTriggers(update);
+                break;
             case STOP:
                 machine.sendResponse(update, machine.getScheduledJobs(getUserName(update)));
                 machine.changeStateTo(new StopJobState(machine));
@@ -54,6 +58,13 @@ public class HandleMenuState extends State {
                 machine.sendResponse(update, format("No such command supported are: %s", menuOptions));
                 break;
         }
+    }
+
+    private void showTriggers(Update update) {
+        String triggersDescription = machine.getTriggersDescription(getUserName(update));
+        String toSand = !isEmpty(triggersDescription) ? triggersDescription : "There are no triggers!";
+        machine.sendResponse(update, toSand);
+        renderMenu(update);
     }
 
     private void showScheduledJobs(Update update) {

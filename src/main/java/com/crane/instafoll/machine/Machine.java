@@ -84,4 +84,8 @@ public class Machine {
     public String getScheduledJobs(String groupName) {
         return jobsService.getScheduledJobs(groupName);
     }
+
+    public String getTriggersDescription(String groupName) {
+        return jobsService.getTriggersDescription(groupName);
+    }
 }

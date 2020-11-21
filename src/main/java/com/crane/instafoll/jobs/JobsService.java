@@ -6,6 +6,7 @@ import com.crane.instafoll.jobs.unfollow.UnfollowJob;
 import com.crane.instafoll.jobs.unfollow.UnfollowParams;
 import com.crane.instafoll.services.InstaActionService;
 import lombok.AllArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -99,18 +100,18 @@ public class JobsService {
     }
 
     public String getScheduledJobs(String groupName) {
-        return getUserJobs(groupName).stream()
+        return getCurrentUserJobs(groupName).stream()
                 .map(job -> job.getJobDetail().getKey().getName())
                 .collect(Collectors.joining("\n"));
     }
 
     public String getScheduledJobsDetails(String groupName) {
-        return getUserJobs(groupName).stream()
-                .map(this::extractJobDetails)
+        return getCurrentUserJobs(groupName).stream()
+                .map(this::extractCurrentJobDetails)
                 .collect(Collectors.joining("\n"));
     }
 
-    private String extractJobDetails(JobExecutionContext job) {
+    private String extractCurrentJobDetails(JobExecutionContext job) {
         return String.format("%s\n Job started: %s \n Next start at: %s \nParams:\n %s",
                 job.getJobDetail().getKey().toString(),
                 job.getFireTime(),
@@ -120,6 +121,16 @@ public class JobsService {
                         .map((e) -> e.getKey() + " : " + e.getValue())
                         .collect(Collectors.joining("\n"))
 
+        );
+    }
+
+    private String extractJobDetails(Trigger trigger) {
+        return String.format("%s\n Previous Fire Time: %s \n Next start at: %s \nEnd time:\n %s Start time:\n %s",
+                trigger.getJobKey().toString(),
+                trigger.getPreviousFireTime().toString(),
+                trigger.getNextFireTime().toString(),
+                trigger.getEndTime().toString(),
+                trigger.getStartTime().toString()
         );
     }
 
@@ -133,7 +144,7 @@ public class JobsService {
         }
     }
 
-    public List<JobExecutionContext> getUserJobs(String userName) {
+    public List<JobExecutionContext> getCurrentUserJobs(String userName) {
         try {
 
             Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(userName));
@@ -145,6 +156,32 @@ public class JobsService {
             return null;
         }
 
+    }
+
+    public String getTriggersDescription(String userName) {
+
+        Set<JobKey> jobKeys;
+        try {
+            jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(userName));
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+            return "";
+        }
+        return jobKeys.stream()
+                .map(this::getTriggersDescription)
+                .collect(Collectors.joining(","));
+
+    }
+
+    private String getTriggersDescription(JobKey jobKey) {
+        try {
+            return scheduler.getTriggersOfJob(jobKey).stream()
+                    .map(this::extractJobDetails)
+                    .collect(Collectors.joining(","));
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 
 }
