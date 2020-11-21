@@ -71,9 +71,9 @@ public class HandleMenuState extends State {
                 .intervalInSeconds(1200)
                 .maxActionNumber(900)
                 .actionsPerformed(0)
-                .maxRequestsInOneBatch(33)
+                .maxRequestsInOneBatch(17)
                 .maxWaitTime(10)
-                .startWith("karol_461")
+                .startWith("andrey.rybinskiy")
                 .userClient(client)
                 .userName(getUserName(update))
                 .build();
@@ -93,10 +93,10 @@ public class HandleMenuState extends State {
         IGClient client = (IGClient) userStorage.get(INSTAGRAM_CLIENT.toString());
 
         UnfollowParams params = UnfollowParams.builder()
-                .intervalInSeconds(1200)
+                .intervalInSeconds(1200) //every 20 min
                 .maxActionNumber(900)
                 .actionsPerformed(0)
-                .maxRequestsInOneBatch(33)
+                .maxRequestsInOneBatch(17)
                 .maxWaitTime(10)
                 .userClient(client)
                 .userName(getUserName(update))
