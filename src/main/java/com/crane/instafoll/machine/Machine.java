@@ -72,4 +72,16 @@ public class Machine {
     public IGClient instagramLogin(String login, String password) {
         return LoginService.tryLogin(login, password);
     }
+
+    public String getScheduledJobsDetails(String groupName) {
+        return jobsService.getScheduledJobsDetails(groupName);
+    }
+
+    public boolean stopJob(String key, String groupName) {
+        return jobsService.stopJob(key,groupName);
+    }
+
+    public String getScheduledJobs(String groupName) {
+        return jobsService.getScheduledJobs(groupName);
+    }
 }

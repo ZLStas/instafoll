@@ -5,7 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.util.stream.Collectors;
+
 import static com.crane.instafoll.Bot.getUserName;
+import static com.crane.instafoll.machine.states.HandleMenuState.menuOptions;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -14,7 +17,7 @@ public abstract class State {
     public final Machine machine;
 
     public void process(Update update) {
-        log.info(String.format(getUserName(update) + "'s machine in: {}"), getStateName());
+        log.info(String.format("%s's machine in: %s", getUserName(update), getStateName()));
         doProcess(update);
     }
 
@@ -29,7 +32,9 @@ public abstract class State {
 
     protected void renderMenu(Update update) {
         machine.sendResponse(update,
-                "Currently supported jobs follow, and unfollow to proceed enter follow/unfollow respectfully ");
+                String.format("***Menu***\n%s",
+                        String.join("\n", menuOptions)
+                ));
         machine.changeStateTo(new HandleMenuState(machine));
     }
 

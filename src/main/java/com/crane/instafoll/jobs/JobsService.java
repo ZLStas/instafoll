@@ -6,9 +6,25 @@ import com.crane.instafoll.jobs.unfollow.UnfollowJob;
 import com.crane.instafoll.jobs.unfollow.UnfollowParams;
 import com.crane.instafoll.services.InstaActionService;
 import lombok.AllArgsConstructor;
-import org.quartz.*;
-import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.Job;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.util.Arrays.*;
 
 @AllArgsConstructor
 @Component
@@ -16,11 +32,10 @@ public class JobsService {
 
     public static final String MAX_ACTION_NUMBER = "maxActionNumber";
     public static final String START_WITH = "startWith";
-    public static final String FOLLOWING_JOB = "FollowingJob";
-    public static final String UNFOLLOW_JOB = "UnfollowJob";
     public static final String INSTA_ACTION_SERVICE = "instaActionService";
+    public static final List<String> nonUserParams = asList(INSTA_ACTION_SERVICE);
 
-//    private final Scheduler scheduler;
+    private final Scheduler scheduler;
 
     public boolean scheduleFollowJob(FollowParams params) {
         JobDataMap jobData = new JobDataMap();
@@ -30,7 +45,6 @@ public class JobsService {
                 params,
                 FollowJob.class
         );
-
     }
 
     public boolean scheduleUnFollowJob(UnfollowParams params) {
@@ -45,13 +59,8 @@ public class JobsService {
     private boolean scheduleJob(
             JobDataMap jobData,
             JobParams params,
-            Class<? extends Job> jobtype
+            Class<? extends Job> jobType
     ) {
-        Scheduler scheduler = getScheduler();
-        if (!startScheduling(scheduler)) {
-            return false;
-        }
-
         jobData.put(MAX_ACTION_NUMBER, params.getMaxActionNumber());
         jobData.put(INSTA_ACTION_SERVICE,
                 new InstaActionService(
@@ -61,38 +70,25 @@ public class JobsService {
                 )
         );
 
-        JobDetail job = JobBuilder.newJob(jobtype)
-                .withIdentity(jobtype.getSimpleName(), params.getUserName())
+        JobDetail job = JobBuilder.newJob(jobType)
+                .withIdentity(jobType.getSimpleName(), params.getUserName())
                 .usingJobData(jobData)
                 .build();
 
         Trigger trigger = TriggerBuilder.newTrigger()
-                .withIdentity(jobtype.getSimpleName(), params.getUserName())
+                .withIdentity(jobType.getSimpleName(), params.getUserName())
                 .startNow()
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
                         .withIntervalInSeconds(params.getIntervalInSeconds())
                         .repeatForever())
                 .build();
 
-        return startJob(scheduler, job, trigger);
+        return startJob(job, trigger);
     }
 
-    Scheduler getScheduler() {
-        SchedulerFactory schedulerFactory = new StdSchedulerFactory();
+    private boolean startJob(JobDetail job, Trigger trigger) {
         try {
-            return schedulerFactory.getScheduler();
-        } catch (SchedulerException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    boolean startScheduling(Scheduler scheduler) {
-        if (scheduler == null) {
-            return false;
-        }
-        try {
-            scheduler.start();
+            this.scheduler.scheduleJob(job, trigger);
             return true;
         } catch (SchedulerException e) {
             e.printStackTrace();
@@ -100,14 +96,53 @@ public class JobsService {
         }
     }
 
-    private boolean startJob(Scheduler scheduler, JobDetail job, Trigger trigger) {
+    public String getScheduledJobs(String groupName) {
+        return getUserJobs(groupName).stream()
+                .map(job -> job.getJobDetail().getKey().getName())
+                .collect(Collectors.joining("\n"));
+    }
+
+    public String getScheduledJobsDetails(String groupName) {
+        return getUserJobs(groupName).stream()
+                .map(this::extractJobDetails)
+                .collect(Collectors.joining("\n"));
+    }
+
+    private String extractJobDetails(JobExecutionContext job) {
+        return String.format("%s\n Job started: %s \n Next start at: %s \nParams:\n %s",
+                job.getJobDetail().getKey().toString(),
+                job.getFireTime(),
+                job.getNextFireTime(),
+                job.getJobDetail().getJobDataMap().entrySet().stream()
+                        .filter(e -> !nonUserParams.contains(e.getKey()))
+                        .map((e) -> e.getKey() + " : " + e.getValue())
+                        .collect(Collectors.joining("\n"))
+
+        );
+    }
+
+    public boolean stopJob(String key, String groupName) {
         try {
-            scheduler.scheduleJob(job, trigger);
+            scheduler.deleteJob(JobKey.jobKey(key, groupName));
             return true;
         } catch (SchedulerException e) {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public List<JobExecutionContext> getUserJobs(String userName) {
+        try {
+
+            Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(userName));
+           return scheduler.getCurrentlyExecutingJobs().stream()
+                    .filter(job -> jobKeys.contains(job.getJobDetail().getKey()))
+                    .collect(Collectors.toList());
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+            return null;
+        }
+
     }
 
 }

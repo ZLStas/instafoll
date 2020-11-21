@@ -11,15 +11,18 @@ import java.util.Map;
 
 import static com.crane.instafoll.Bot.getUserName;
 import static com.crane.instafoll.machine.states.UserKeys.INSTAGRAM_CLIENT;
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
 public class HandleMenuState extends State {
 
-    private static final String FOLLOW = "follow";
-    private static final String UNFOLLOW = "unfollow";
+     static final String FOLLOW = "follow";
+     static final String UNFOLLOW = "unfollow";
     private static final String RELOGIN = "relogin";
+    private static final String SCHEDULED = "scheduled";
+    private static final String STOP = "stop";
 
-    List<String> menuOptions = asList(FOLLOW, UNFOLLOW, RELOGIN);
+    static final List<String> menuOptions = asList(FOLLOW, UNFOLLOW, RELOGIN, SCHEDULED, STOP);
 
     public HandleMenuState(Machine machine) {
         super(machine);
@@ -38,12 +41,22 @@ public class HandleMenuState extends State {
             case RELOGIN:
                 relogin(update);
                 break;
+            case SCHEDULED:
+                showScheduledJobs(update);
+                break;
+            case STOP:
+                machine.sendResponse(update, machine.getScheduledJobs(getUserName(update)));
+                machine.changeStateTo(new StopJobState(machine));
+                break;
             default:
-                machine.sendResponse(update,
-                        String.format("No such command supported are: {}", menuOptions)
-                );
+                machine.sendResponse(update, format("No such command supported are: %s", menuOptions));
                 break;
         }
+    }
+
+    private void showScheduledJobs(Update update) {
+        machine.sendResponse(update, machine.getScheduledJobsDetails(getUserName(update)));
+        renderMenu(update);
     }
 
     public void startFollowJob(Update update) {
