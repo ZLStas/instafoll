@@ -20,7 +20,7 @@ public class UnfollowJob implements Job {
 
     private InstaActionService instaActionService;
 
-    private int actionsPerformed = 0;
+    private Integer actionsPerformed;
 
     public void execute(JobExecutionContext context) {
         log.info("Unfollow started at: {}", new Date());

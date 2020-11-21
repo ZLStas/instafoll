@@ -12,7 +12,7 @@ public class JobParams {
 
     private int maxActionNumber;
 
-    private int actionsPerformed;
+    private Integer actionsPerformed;
 
     private int intervalInSeconds;
 

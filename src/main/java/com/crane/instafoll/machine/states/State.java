@@ -14,10 +14,14 @@ import static com.crane.instafoll.machine.states.HandleMenuState.menuOptions;
 @RequiredArgsConstructor
 public abstract class State {
 
+    public static final String RESTART = "restart";
     public final Machine machine;
 
     public void process(Update update) {
         log.info(String.format("%s's machine in: %s", getUserName(update), getStateName()));
+        if (machine.getMessageTest(update).equalsIgnoreCase(RESTART)) {
+            machine.changeStateTo(new HelloState(machine));
+        }
         doProcess(update);
     }
 
@@ -26,7 +30,7 @@ public abstract class State {
     public abstract String getStateName();
 
     protected void relogin(Update update) {
-        machine.sendResponse(update, "Can't login with provided login and password, try one more time enter you login:");
+        machine.sendResponse(update, "Enter you login:");
         machine.changeStateTo(new GetLoginState(machine));
     }
 

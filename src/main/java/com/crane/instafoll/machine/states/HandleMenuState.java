@@ -4,24 +4,27 @@ import com.crane.instafoll.jobs.follow.FollowParams;
 import com.crane.instafoll.jobs.unfollow.UnfollowParams;
 import com.crane.instafoll.machine.Machine;
 import com.github.instagram4j.instagram4j.IGClient;
+import io.micrometer.core.instrument.util.StringUtils;
 import org.telegram.telegrambots.meta.api.objects.Update;
+
 import java.util.List;
 import java.util.Map;
 
 import static com.crane.instafoll.Bot.getUserName;
 import static com.crane.instafoll.machine.states.UserKeys.INSTAGRAM_CLIENT;
+import static io.micrometer.core.instrument.util.StringUtils.isEmpty;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
 public class HandleMenuState extends State {
 
-     static final String FOLLOW = "follow";
-     static final String UNFOLLOW = "unfollow";
+    static final String FOLLOW = "follow";
+    static final String UNFOLLOW = "unfollow";
     private static final String RELOGIN = "relogin";
     private static final String SCHEDULED = "scheduled";
     private static final String STOP = "stop";
 
-    static final List<String> menuOptions = asList(FOLLOW, UNFOLLOW, RELOGIN, SCHEDULED, STOP);
+    static final List<String> menuOptions = asList(FOLLOW, UNFOLLOW, RELOGIN, SCHEDULED, STOP, RESTART);
 
     public HandleMenuState(Machine machine) {
         super(machine);
@@ -54,7 +57,9 @@ public class HandleMenuState extends State {
     }
 
     private void showScheduledJobs(Update update) {
-        machine.sendResponse(update, machine.getScheduledJobsDetails(getUserName(update)));
+        String jobsDetails = machine.getScheduledJobsDetails(getUserName(update));
+        String toSand = !isEmpty(jobsDetails) ? jobsDetails : "No jobs are scheduled!";
+        machine.sendResponse(update, toSand);
         renderMenu(update);
     }
 
@@ -63,9 +68,10 @@ public class HandleMenuState extends State {
         IGClient client = (IGClient) userStorage.get(INSTAGRAM_CLIENT.toString());
 
         FollowParams followParams = FollowParams.builder()
-                .intervalInSeconds(3600)
-                .maxActionNumber(500)
-                .maxRequestsInOneBatch(100)
+                .intervalInSeconds(1200)
+                .maxActionNumber(900)
+                .actionsPerformed(0)
+                .maxRequestsInOneBatch(33)
                 .maxWaitTime(10)
                 .startWith("karol_461")
                 .userClient(client)
@@ -87,10 +93,10 @@ public class HandleMenuState extends State {
         IGClient client = (IGClient) userStorage.get(INSTAGRAM_CLIENT.toString());
 
         UnfollowParams params = UnfollowParams.builder()
-                .intervalInSeconds(3600)
-                .maxActionNumber(500)
+                .intervalInSeconds(1200)
+                .maxActionNumber(900)
                 .actionsPerformed(0)
-                .maxRequestsInOneBatch(100)
+                .maxRequestsInOneBatch(33)
                 .maxWaitTime(10)
                 .userClient(client)
                 .userName(getUserName(update))

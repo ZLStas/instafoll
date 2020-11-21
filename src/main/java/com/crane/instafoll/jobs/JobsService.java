@@ -34,6 +34,7 @@ public class JobsService {
     public static final String START_WITH = "startWith";
     public static final String INSTA_ACTION_SERVICE = "instaActionService";
     public static final List<String> nonUserParams = asList(INSTA_ACTION_SERVICE);
+    public static final String ACTIONS_PERFORMED = "actionsPerformed";
 
     private final Scheduler scheduler;
 
@@ -62,6 +63,7 @@ public class JobsService {
             Class<? extends Job> jobType
     ) {
         jobData.put(MAX_ACTION_NUMBER, params.getMaxActionNumber());
+        jobData.put(ACTIONS_PERFORMED, params.getActionsPerformed());
         jobData.put(INSTA_ACTION_SERVICE,
                 new InstaActionService(
                         params.getUserClient(),
