@@ -21,7 +21,9 @@ import org.quartz.TriggerBuilder;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -108,7 +110,7 @@ public class JobsService {
     public String getScheduledJobsDetails(String groupName) {
         return getCurrentUserJobs(groupName).stream()
                 .map(this::extractCurrentJobDetails)
-                .collect(Collectors.joining("\n"));
+                .collect(Collectors.joining("\n\n"));
     }
 
     private String extractCurrentJobDetails(JobExecutionContext job) {
@@ -125,12 +127,12 @@ public class JobsService {
     }
 
     private String extractJobDetails(Trigger trigger) {
-        return String.format("%s\n Previous Fire Time: %s \n Next start at: %s \nEnd time:\n %s Start time:\n %s",
+        return String.format("%s\n Previous Fire Time: %s \n Next start at: %s\n End time: %s\n Start time: %s\n",
                 trigger.getJobKey().toString(),
                 trigger.getPreviousFireTime().toString(),
                 trigger.getNextFireTime().toString(),
-                trigger.getEndTime().toString(),
-                trigger.getStartTime().toString()
+                Optional.ofNullable(trigger.getEndTime()).map(Date::toString).orElse("---"),
+                Optional.ofNullable(trigger.getStartTime()).map(Date::toString).orElse("---")
         );
     }
 
@@ -169,7 +171,7 @@ public class JobsService {
         }
         return jobKeys.stream()
                 .map(this::getTriggersDescription)
-                .collect(Collectors.joining(","));
+                .collect(Collectors.joining("\n"));
 
     }
 
@@ -177,7 +179,7 @@ public class JobsService {
         try {
             return scheduler.getTriggersOfJob(jobKey).stream()
                     .map(this::extractJobDetails)
-                    .collect(Collectors.joining(","));
+                    .collect(Collectors.joining("\n\n"));
         } catch (SchedulerException e) {
             e.printStackTrace();
         }
