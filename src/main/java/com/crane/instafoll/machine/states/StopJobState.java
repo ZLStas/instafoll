@@ -1,6 +1,7 @@
 package com.crane.instafoll.machine.states;
 
 import com.crane.instafoll.machine.Machine;
+
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static com.crane.instafoll.Bot.getUserName;
