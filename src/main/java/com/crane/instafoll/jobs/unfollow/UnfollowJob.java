@@ -2,13 +2,10 @@ package com.crane.instafoll.jobs.unfollow;
 
 import com.crane.instafoll.services.InstaActionService;
 import com.github.instagram4j.instagram4j.models.user.Profile;
-import lombok.AllArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
@@ -23,11 +20,11 @@ public class UnfollowJob implements Job {
 
     private InstaActionService instaActionService;
 
-    private int unfollowed = 0;
+    private int actionsPerformed = 0;
 
     public void execute(JobExecutionContext context) {
         log.info("Unfollow started at: {}", new Date());
-        if (this.unfollowed > maxActionNumber) {
+        if (this.actionsPerformed > maxActionNumber) {
             return;
         }
 
@@ -35,9 +32,9 @@ public class UnfollowJob implements Job {
         log.info("Number of users to unfollow: {}", usersToUnfollow.size());
 
         int unfollowedInBatch = instaActionService.doAction(usersToUnfollow);
-        this.unfollowed += unfollowedInBatch;
+        this.actionsPerformed += unfollowedInBatch;
         log.info("Unfollow completed at: {}, unfollowed in batch: {}, total unfollowed: {}",
-                new Date(), unfollowedInBatch, this.unfollowed
+                new Date(), unfollowedInBatch, this.actionsPerformed
         );
     }
 }

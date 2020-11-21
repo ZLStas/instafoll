@@ -15,6 +15,7 @@ public class FollowParams extends JobParams {
     public FollowParams(String userName,
                         String startWith,
                         int maxActionNumber,
+                        int actionsPerformed,
                         int intervalInSeconds,
                         int maxWaitTime,
                         int maxRequestsInOneBatch,
@@ -23,6 +24,7 @@ public class FollowParams extends JobParams {
         super(
                 userName,
                 maxActionNumber,
+                actionsPerformed,
                 intervalInSeconds,
                 maxWaitTime,
                 maxRequestsInOneBatch,

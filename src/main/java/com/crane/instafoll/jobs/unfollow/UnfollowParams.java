@@ -14,6 +14,7 @@ public class UnfollowParams extends JobParams {
     @Builder
     public UnfollowParams(String userName,
                           int maxActionNumber,
+                          int actionsPerformed,
                           int intervalInSeconds,
                           int maxWaitTime,
                           int maxRequestsInOneBatch,
@@ -22,6 +23,7 @@ public class UnfollowParams extends JobParams {
         super(
                 userName,
                 maxActionNumber,
+                actionsPerformed,
                 intervalInSeconds,
                 maxWaitTime,
                 maxRequestsInOneBatch,

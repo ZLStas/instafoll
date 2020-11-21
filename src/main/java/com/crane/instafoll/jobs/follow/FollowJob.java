@@ -2,12 +2,10 @@ package com.crane.instafoll.jobs.follow;
 
 import com.crane.instafoll.services.InstaActionService;
 import com.github.instagram4j.instagram4j.models.user.Profile;
-import lombok.AllArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
@@ -22,7 +20,7 @@ public class FollowJob implements Job {
 
     private int maxActionNumber;
 
-    private int followed = 0;
+    private int actionsPerformed = 0;
 
     private InstaActionService instaActionService;
 
@@ -34,7 +32,7 @@ public class FollowJob implements Job {
                 instaActionService.getPkByUserName(startWith) :
                 this.hopUser;
 
-        if (this.followed > maxActionNumber) {
+        if (this.actionsPerformed > maxActionNumber) {
             log.info("reached max actions");
             return;
         }
@@ -44,10 +42,10 @@ public class FollowJob implements Job {
         log.info("Number of users to follow: {}", usersToFollow.size());
         int followedInBatch = instaActionService.doAction(usersToFollow);
 
-        this.followed += followedInBatch;
+        this.actionsPerformed += followedInBatch;
         hopUser = instaActionService.pickHopUser(usersToFollow);
         log.info("Following completed at: {}, followed in batch: {}, total unfollowed: {}",
-                new Date(), followedInBatch, this.followed
+                new Date(), followedInBatch, this.actionsPerformed
         );
     }
 

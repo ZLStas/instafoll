@@ -89,6 +89,7 @@ public class HandleMenuState extends State {
         UnfollowParams params = UnfollowParams.builder()
                 .intervalInSeconds(3600)
                 .maxActionNumber(500)
+                .actionsPerformed(0)
                 .maxRequestsInOneBatch(100)
                 .maxWaitTime(10)
                 .userClient(client)
