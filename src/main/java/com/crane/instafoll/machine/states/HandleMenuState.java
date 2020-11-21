@@ -5,7 +5,6 @@ import com.crane.instafoll.jobs.unfollow.UnfollowParams;
 import com.crane.instafoll.machine.Machine;
 import com.github.instagram4j.instagram4j.IGClient;
 import org.telegram.telegrambots.meta.api.objects.Update;
-
 import java.util.List;
 import java.util.Map;
 
