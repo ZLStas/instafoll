@@ -6,8 +6,7 @@ import com.crane.instafoll.jobs.follow.FollowParams;
 import com.crane.instafoll.jobs.unfollow.UnfollowParams;
 import com.crane.instafoll.machine.states.HelloState;
 import com.crane.instafoll.machine.states.State;
-import com.crane.instafoll.services.LoginService;
-import com.github.instagram4j.instagram4j.IGClient;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -16,22 +15,16 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.Map;
 
 @Slf4j
+@RequiredArgsConstructor
 public class Machine {
 
     private final Bot bot;
 
     private final JobsService jobsService;
 
-    private State state;
-
     private final Map<String, Object> userStorage;
 
-    public Machine(Map<String, Object> userStorage, Bot bot, JobsService jobsService) {
-        this.bot = bot;
-        this.userStorage = userStorage;
-        this.jobsService = jobsService;
-        this.state = new HelloState(this);
-    }
+    private State state = new HelloState(this);
 
     public void process(Update update) {
         state.process(update);
@@ -50,7 +43,7 @@ public class Machine {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
-        log.info("Message: \"{}\" sent to user: {}", textToSend, bot.getUserName(update));
+        log.info("Message: \"{}\" sent to user: {}", textToSend, Bot.getUserName(update));
     }
 
     public String getMessageTest(Update update) {
@@ -69,16 +62,12 @@ public class Machine {
         return jobsService.scheduleUnFollowJob(unfollowParams);
     }
 
-    public IGClient instagramLogin(String login, String password) {
-        return LoginService.tryLogin(login, password);
-    }
-
     public String getScheduledJobsDetails(String groupName) {
         return jobsService.getScheduledJobsDetails(groupName);
     }
 
     public boolean stopJob(String key, String groupName) {
-        return jobsService.stopJob(key,groupName);
+        return jobsService.stopJob(key, groupName);
     }
 
     public String getScheduledJobs(String groupName) {

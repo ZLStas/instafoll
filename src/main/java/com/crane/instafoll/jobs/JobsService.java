@@ -6,7 +6,6 @@ import com.crane.instafoll.jobs.unfollow.UnfollowJob;
 import com.crane.instafoll.jobs.unfollow.UnfollowParams;
 import com.crane.instafoll.services.InstaActionService;
 import lombok.AllArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -21,13 +20,12 @@ import org.quartz.TriggerBuilder;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static java.util.Arrays.asList;
 
 @AllArgsConstructor
 @Component
@@ -36,7 +34,7 @@ public class JobsService {
     public static final String MAX_ACTION_NUMBER = "maxActionNumber";
     public static final String START_WITH = "startWith";
     public static final String INSTA_ACTION_SERVICE = "instaActionService";
-    public static final List<String> nonUserParams = asList(INSTA_ACTION_SERVICE);
+    public static final List<String> nonUserParams = Collections.singletonList(INSTA_ACTION_SERVICE);
     public static final String ACTIONS_PERFORMED = "actionsPerformed";
 
     private final Scheduler scheduler;
@@ -91,16 +89,6 @@ public class JobsService {
         return startJob(job, trigger);
     }
 
-    private boolean startJob(JobDetail job, Trigger trigger) {
-        try {
-            this.scheduler.scheduleJob(job, trigger);
-            return true;
-        } catch (SchedulerException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     public String getScheduledJobs(String groupName) {
         return getCurrentUserJobs(groupName).stream()
                 .map(job -> job.getJobDetail().getKey().getName())
@@ -126,16 +114,6 @@ public class JobsService {
         );
     }
 
-    private String extractJobDetails(Trigger trigger) {
-        return String.format("%s\n Previous Fire Time: %s \n Next start at: %s\n End time: %s\n Start time: %s\n",
-                trigger.getJobKey().toString(),
-                trigger.getPreviousFireTime().toString(),
-                trigger.getNextFireTime().toString(),
-                Optional.ofNullable(trigger.getEndTime()).map(Date::toString).orElse("---"),
-                Optional.ofNullable(trigger.getStartTime()).map(Date::toString).orElse("---")
-        );
-    }
-
     public boolean stopJob(String key, String groupName) {
         try {
             scheduler.deleteJob(JobKey.jobKey(key, groupName));
@@ -148,7 +126,6 @@ public class JobsService {
 
     public List<JobExecutionContext> getCurrentUserJobs(String userName) {
         try {
-
             Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(userName));
            return scheduler.getCurrentlyExecutingJobs().stream()
                     .filter(job -> jobKeys.contains(job.getJobDetail().getKey()))
@@ -179,11 +156,31 @@ public class JobsService {
         try {
             return scheduler.getTriggersOfJob(jobKey).stream()
                     .map(this::extractJobDetails)
-                    .collect(Collectors.joining("\n\n"));
+                    .collect(Collectors.joining("\n\ndip"));
         } catch (SchedulerException e) {
             e.printStackTrace();
         }
         return "";
+    }
+
+    private boolean startJob(JobDetail job, Trigger trigger) {
+        try {
+            this.scheduler.scheduleJob(job, trigger);
+            return true;
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private String extractJobDetails(Trigger trigger) {
+        return String.format("%s\n Previous Fire Time: %s \n Next start at: %s\n End time: %s\n Start time: %s\n",
+                trigger.getJobKey().toString(),
+                trigger.getPreviousFireTime().toString(),
+                trigger.getNextFireTime().toString(),
+                Optional.ofNullable(trigger.getEndTime()).map(Date::toString).orElse("---"),
+                Optional.ofNullable(trigger.getStartTime()).map(Date::toString).orElse("---")
+        );
     }
 
 }

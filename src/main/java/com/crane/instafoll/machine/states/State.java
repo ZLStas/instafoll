@@ -5,8 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import java.util.stream.Collectors;
-
 import static com.crane.instafoll.Bot.getUserName;
 import static com.crane.instafoll.machine.states.HandleMenuState.menuOptions;
 
@@ -17,6 +15,10 @@ public abstract class State {
     public static final String RESTART = "restart";
     public final Machine machine;
 
+    public abstract String getStateName();
+
+    protected abstract void doProcess(Update update);
+
     public void process(Update update) {
         log.info(String.format("%s's machine in: %s", getUserName(update), getStateName()));
         if (machine.getMessageTest(update).equalsIgnoreCase(RESTART)) {
@@ -24,10 +26,6 @@ public abstract class State {
         }
         doProcess(update);
     }
-
-    protected abstract void doProcess(Update update);
-
-    public abstract String getStateName();
 
     protected void relogin(Update update) {
         machine.sendResponse(update, "Enter you login:");
@@ -38,7 +36,8 @@ public abstract class State {
         machine.sendResponse(update,
                 String.format("***Menu***\n%s",
                         String.join("\n", menuOptions)
-                ));
+                )
+        );
         machine.changeStateTo(new HandleMenuState(machine));
     }
 

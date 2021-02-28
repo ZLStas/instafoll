@@ -9,8 +9,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import static com.crane.instafoll.machine.states.UserKeys.INSTAGRAM_CHALLENGE;
 import static com.crane.instafoll.machine.states.UserKeys.INSTAGRAM_CLIENT;
@@ -53,13 +51,13 @@ public class GetPasswordState extends State {
             storage.remove(INSTAGRAM_CHALLENGE.toString()); //clean up old challenge
             machine.sendResponse(update, "Input challenge sent to you by instagram");
             machine.changeStateTo(new GetChallengeState(machine));
-            String chllange = (String) storage.get(INSTAGRAM_CHALLENGE.toString());
-            while (chllange == null) {
-                chllange = (String) storage.get(INSTAGRAM_CHALLENGE.toString());
+            String challenge = (String) storage.get(INSTAGRAM_CHALLENGE.toString());
+            while (challenge == null) {
+                challenge = (String) storage.get(INSTAGRAM_CHALLENGE.toString());
                 Thread.sleep(3000);
             }
 
-            return chllange;
+            return challenge;
         };
 
         try {

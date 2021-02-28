@@ -4,7 +4,6 @@ import com.crane.instafoll.jobs.follow.FollowParams;
 import com.crane.instafoll.jobs.unfollow.UnfollowParams;
 import com.crane.instafoll.machine.Machine;
 import com.github.instagram4j.instagram4j.IGClient;
-import io.micrometer.core.instrument.util.StringUtils;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.List;
@@ -60,20 +59,6 @@ public class HandleMenuState extends State {
         }
     }
 
-    private void showTriggers(Update update) {
-        String triggersDescription = machine.getTriggersDescription(getUserName(update));
-        String toSand = !isEmpty(triggersDescription) ? triggersDescription : "There are no triggers!";
-        machine.sendResponse(update, toSand);
-        renderMenu(update);
-    }
-
-    private void showScheduledJobs(Update update) {
-        String jobsDetails = machine.getScheduledJobsDetails(getUserName(update));
-        String toSand = !isEmpty(jobsDetails) ? jobsDetails : "No jobs are scheduled!";
-        machine.sendResponse(update, toSand);
-        renderMenu(update);
-    }
-
     public void startFollowJob(Update update) {
         Map<String, Object> userStorage = machine.getUserStorage();
         IGClient client = (IGClient) userStorage.get(INSTAGRAM_CLIENT.toString());
@@ -108,7 +93,7 @@ public class HandleMenuState extends State {
                 .maxActionNumber(900)
                 .actionsPerformed(0)
                 .maxRequestsInOneBatch(17)
-                .maxWaitTime(10)
+                .maxWaitTime(180)
                 .userClient(client)
                 .userName(getUserName(update))
                 .build();
@@ -121,6 +106,20 @@ public class HandleMenuState extends State {
             machine.sendResponse(update, "Job scheduling failed try later");
             relogin(update);
         }
+    }
+
+    private void showTriggers(Update update) {
+        String triggersDescription = machine.getTriggersDescription(getUserName(update));
+        String toSand = !isEmpty(triggersDescription) ? triggersDescription : "There are no triggers!";
+        machine.sendResponse(update, toSand);
+        renderMenu(update);
+    }
+
+    private void showScheduledJobs(Update update) {
+        String jobsDetails = machine.getScheduledJobsDetails(getUserName(update));
+        String toSand = !isEmpty(jobsDetails) ? jobsDetails : "No jobs are scheduled!";
+        machine.sendResponse(update, toSand);
+        renderMenu(update);
     }
 
     @Override

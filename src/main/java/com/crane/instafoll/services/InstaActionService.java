@@ -32,14 +32,6 @@ public class InstaActionService {
 
     private final Random rand = new Random();
 
-
-//    @Scheduled(cron = "0 1 1 * * ?") //TODO
-//    private void dropActionsLimitEachDay() {
-//        this.unfollowed = 0;
-//        this.followed = 0;
-//
-//    }
-
     public int doAction(List<Profile> usersToDoActionOn) { //TODO refactor properly!
         AtomicInteger actionsPerformed = new AtomicInteger();
         int numberOfUsersToActionOn = getNumberOfUsersToDoActionOn(usersToDoActionOn.size());

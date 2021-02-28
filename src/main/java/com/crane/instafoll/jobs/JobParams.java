@@ -8,18 +8,18 @@ import lombok.Getter;
 @AllArgsConstructor
 public class JobParams {
 
-    private String userName;
+    private final String userName;
 
-    private int maxActionNumber;
+    private final int maxActionNumber;
 
-    private Integer actionsPerformed;
+    private final Integer actionsPerformed;
 
-    private int intervalInSeconds;
+    private final int intervalInSeconds;
 
-    private int maxWaitTime;
+    private final int maxWaitTime;
 
-    private int maxRequestsInOneBatch;
+    private final int maxRequestsInOneBatch;
 
-    private IGClient userClient;
+    private final IGClient userClient;
 
 }

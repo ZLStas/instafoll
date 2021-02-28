@@ -2,7 +2,9 @@ package com.crane.instafoll.jobs.follow;
 
 import com.crane.instafoll.jobs.JobParams;
 import com.github.instagram4j.instagram4j.IGClient;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 
 @Setter
